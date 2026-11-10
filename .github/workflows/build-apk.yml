@@ -1,16 +1,9 @@
 name: Build APK
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:          # 允许在 GitHub 网页上手动触发
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,11 +17,18 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      # 关键修复：生成 local.properties
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-      - name: Upload Debug APK
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DocScanner-debug
+          name: my-app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
