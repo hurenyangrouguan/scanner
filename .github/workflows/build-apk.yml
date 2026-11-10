@@ -1,12 +1,14 @@
-- name: Setup Gradle
-  uses: gradle/actions/setup-gradle@v3
+name: Build APK
 
-- name: Build Debug APK
-  run: gradle assembleDebug
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,17 +21,18 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          # 关键修复：覆盖默认的安装包，避开已经被废弃的 'tools' 包
-          packages: 'platform-tools'
 
-      - name: Grant execute permission for gradlew
+      - name: Make gradlew executable
         run: chmod +x ./gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DocScanner-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
         uses: actions/upload-artifact@v4
         with:
           name: my-app-debug
