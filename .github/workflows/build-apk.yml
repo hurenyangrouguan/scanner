@@ -6,24 +6,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      # 修复 SDK 路径问题
-      - name: Create local.properties
-        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-
-      # 修复 SDK 版本不匹配问题（请根据 build.gradle 替换版本号）
-      - name: Install required SDK components
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+        uses: android-actions/setup-android@v4
+        with:
+          # v4 默认不再请求废弃的 `tools` 包，无需额外配置
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -32,7 +26,7 @@ jobs:
         run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: my-app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
